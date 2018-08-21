@@ -104,6 +104,8 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 			if(bDebugPrinting) print("changed the open price persist flag back");
 		}
 		
+		bOpenPriceRepeat = false; //Reset flag to avoid errors
+		
 		return true;
 	}
 	else
