@@ -1,0 +1,113 @@
+dofile("etal\\lib\\keys.moc");	// load the function key lib
+
+local bDebugPrinting = true;
+local szDiscriptor; //used for storeing the set name
+local bOpenPriceRepeat = false;
+
+const FLAG_SI1 = 0x08;
+const FLAG_SI2 = 0x10;
+const FLAG_SI3 = 0x20;
+const FLAG_SI4 = 0x40;
+const FLAG_SI5 = 0x80;
+
+function BeforeKeyPress(nFile, nRecord, nKeytype)
+{
+	if(nFile != 1) // This Ain't a PLU key, we don't care
+	{
+		return true;
+	}
+	
+	local bTextMessageCheck = false;
+	local nIndex;
+	local nCleark = ICR_GetCurrentClerk();
+		
+	if(nCleark == 0)// Check if someone is singed on
+	{
+		ICR_Error(1); //Not singed on.
+		return false; //Don't press the key
+	}	
+		
+	//Call in the plu to check the flag
+	local tPLU = ICR_GetPGMData(1, nRecord);
+	
+	//Is this the flag that tells us it is open text !! 	
+	if(tPLU.FLAG1 & FLAG_SI5) //we have used plu flag Selective Itemiser 5
+	{	
+		 
+		local szMessage = ICR_GetAlphaDialog("Enter Freetext Message", 16, true); //Get the text		
+		if(szMessage == "" && tPLU.FLAG2 & 0x08) return false; // jump out if nothing is entered and is condement
+		
+		if(bDebugPrinting) print("Message is "+szMessage);		
+		if(bDebugPrinting) print("PLU Name: "+tPLU.NAME);
+		
+		local tfile101 = ICR_GetPGMData(101,1);
+		//Check and set open price persist if needed
+		if(!(tfile101.SCANPLUSTATUS & 0x00000020))
+		{
+			bOpenPriceRepeat = true;
+			tfile101.SCANPLUSTATUS = tfile101.SCANPLUSTATUS ^ 0x00000020;
+			ICR_SetPGMData(101,1,tfile101);
+			if(bDebugPrinting) print("changed the open price persist flag");
+		}
+				
+		szDiscriptor = tPLU.NAME; // Get the current name of the plu		
+		
+		if(szMessage == "") return true; // if the message is blank we are done. 
+		
+		tPLU.NAME <- szMessage;
+		if(bDebugPrinting) print("PLU Name: "+tPLU.NAME);
+		if(bDebugPrinting) print("PLU Price: "+tPLU.PRICE1L1);		
+		ICR_SetPGMData(1,nRecord, tPLU)
+		if(bDebugPrinting) print("Befor Keypress Stored Discriptor : "+szDiscriptor);		
+		return true;
+	}	
+	else
+	{
+		return true;
+	}
+}
+
+function AfterKeyPress(nFile, nRecord, nKeyType)
+{
+	if(nFile != 1)
+	{
+		return true; //not a PLU
+	}
+	
+	local bTextMessageCheck = false;
+	local nIndex;
+	
+	//Call in the plu to check the flag
+	local tPLU = ICR_GetPGMData(1, nRecord);	
+	
+	if(tPLU.FLAG1 & FLAG_SI5)
+	{
+		bTextMessageCheck = true;
+	}
+	
+	//TODO TEST- Check if this can be done safely with script scope variable 
+	if(bTextMessageCheck)
+	{
+		
+		if(bDebugPrinting) print("AfterKeyPress stored Discriptor: "+szDiscriptor)		
+		if(bDebugPrinting) print("AfterKeyPress PLU Price: "+tPLU.PRICE1L1);
+		tPLU.NAME <- szDiscriptor;
+		//ICR_SetPGMData(1, nFreetextMessagePLUs[nIndex], tPLU);
+		ICR_SetPGMData(1,nRecord, tPLU)
+		//TODO Reset Open Price persist if needed
+		
+		if(bOpenPriceRepeat)
+		{
+			local tfile101 = ICR_GetPGMData(101,1);
+			tfile101.SCANPLUSTATUS = tfile101.SCANPLUSTATUS ^ 0x00000020;
+			ICR_SetPGMData(101,1,tfile101);
+			if(bDebugPrinting) print("changed the open price persist flag back");
+		}
+		
+		return true;
+	}
+	else
+	{
+		return true;
+	}
+}

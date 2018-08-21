@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<ETAL>
+	<FILE>TextMessage.moc</FILE>
+	<OUTPUTFILE>output.txt</OUTPUTFILE>
+	<NAME>Text Message</NAME>
+	
+	<CREATED>01/06/2018</CREATED>
+	<LASTMODIFIED>19/08/2018</LASTMODIFIED>
+	<MINVERID>5540</MINVERID>
+	<AUTHOR>Michael.RadleySystems</AUTHOR>
+</ETAL>
