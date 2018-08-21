@@ -16,9 +16,7 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 	{
 		return true;
 	}
-	
-	local bTextMessageCheck = false;
-	local nIndex;
+		
 	local nCleark = ICR_GetCurrentClerk();
 		
 	if(nCleark == 0)// Check if someone is singed on
@@ -74,19 +72,11 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 		return true; //not a PLU
 	}
 	
-	local bTextMessageCheck = false;
-	local nIndex;
-	
 	//Call in the plu to check the flag
 	local tPLU = ICR_GetPGMData(1, nRecord);	
 	
-	if(tPLU.FLAG1 & FLAG_SI5)
-	{
-		bTextMessageCheck = true;
-	}
-	
 	//TODO TEST- Check if this can be done safely with script scope variable 
-	if(bTextMessageCheck)
+	if(tPLU.FLAG1 & FLAG_SI5)
 	{
 		
 		if(bDebugPrinting) print("AfterKeyPress stored Discriptor: "+szDiscriptor)		
