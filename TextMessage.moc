@@ -103,3 +103,19 @@ function AfterKeyPress(nFile, nRecord, nKeyType)
 		return true;
 	}
 }
+
+/**********************************************************************
+OnBarcode(szBarcodeData)
+Occurs when Barcode scanned but before pos executes bar code.
+Return false to stop barcode. true to continue.
+**********************************************************************/
+
+function OnBarcode(szBarcodeData)
+{
+    // Was scanned thing a plu in our program ?
+    local nScannedPLU = ICR_GetPLURecNumber(szBarcodeData);
+    if((nScannedPLU == null) || (nScannedPLU == 0 ))return true; // Nope. Let till deal with it.
+    // If its a plu. do the before press checking we do on the Key.
+    if(bDebugPrinting)print("Invoking BKP for BarcodePlu "+nScannedPLU);
+    return BeforeKeyPress(1, nScannedPLU, 1000);
+}
