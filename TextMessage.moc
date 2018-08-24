@@ -50,12 +50,11 @@ function BeforeKeyPress(nFile, nRecord, nKeytype)
 				
 		szDiscriptor = tPLU.NAME; // Get the current name of the plu		
 		
-		if(szMessage == "") return true; // if the message is blank we are done. 
-		
+		if(szMessage == "") return true; // if the message is blank we are done.				
 		tPLU.NAME <- szMessage;
-		if(bDebugPrinting) print("PLU Name: "+tPLU.NAME);
+		if(bDebugPrinting) print("PLU Name: "+tPLU.NAME);		
 		if(bDebugPrinting) print("PLU Price: "+tPLU.PRICE1L1);		
-		ICR_SetPGMData(1,nRecord, tPLU)
+		ICR_SetPGMData(1,nRecord, tPLU);		
 		if(bDebugPrinting) print("Befor Keypress Stored Discriptor : "+szDiscriptor);		
 		return true;
 	}	
